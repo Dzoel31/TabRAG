@@ -53,6 +53,23 @@ Jika Anda ingin berkontribusi pada proyek ini, silakan ikuti langkah-langkah ber
 4. Uji perubahan Anda.
 5. Kirim permintaan tarik (pull request) ke repositori utama.
 
+## Commit Convention
+
+Follow this format for commit messages:
+
+- **feat**: Add a new feature
+- **fix**: Fix a bug
+- **docs**: Documentation changes
+- **ref**: Code refactoring that does not add features or fix bugs
+- **test**: Add or improve tests
+- **chore**: Minor changes (build, dependencies, etc.)
+
+Examples:
+
+- feat: add parser for DOCX files
+- fix: fix error when uploading large PDF
+- docs: update README for usage instructions
+
 ## Dalam Pengembangan 🏗️
 
 - Testing.

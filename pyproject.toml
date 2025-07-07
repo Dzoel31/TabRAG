@@ -1,0 +1,25 @@
+[project]
+name = "TabRAG"
+version = "0.1.0"
+description = "TabRAG (Tanya Bareng RAG) is a Streamlit app that allows users to upload documents and query them using a RAG (Retrieval-Augmented Generation) approach with an Elasticsearch backend."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "docling>=2.39.0",
+    "elasticsearch>=9.0.2",
+    "langchain>=0.3.26",
+    "langchain-ollama>=0.3.3",
+    "python-dotenv>=1.1.1",
+    "sentence-transformers>=4.1.0",
+    "streamlit>=1.46.1",
+]
+
+[tool.uv]
+index-strategy = "unsafe-best-match"
+
+[dependency-groups]
+dev = [
+    "coverage>=7.9.1",
+    "pytest>=8.4.1",
+    "ruff>=0.12.1",
+]

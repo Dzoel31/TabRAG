@@ -10,15 +10,15 @@ if "prefix" not in st.session_state:
     st.session_state.prefix = None
 
 st.set_page_config(
-    page_title="FAQ Yuk!",
+    page_title="TabRAG - Tanya Bareng RAG",
     page_icon=":question:",
 )
 
 def main():
-    st.title("FAQ Yuk!")
+    st.title("TabRAG - Tanya Bareng RAG")
     st.markdown(
         """
-        This is a simple FAQ Yuk! application built with Streamlit, LangChain, and Ollama.
+        This is a simple TabRAG - Tanya Bareng RAG application built with Streamlit, LangChain, and Ollama.
         You can upload PDF documents, chat with the knowledge base, and view the knowledge dashboard.
         - **Knowledge Dashboard**: View and manage your knowledge base.
         - **Chat**: Ask questions about the knowledge base and get answers.

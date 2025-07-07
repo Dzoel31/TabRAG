@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "docling>=2.39.0",
+    "einops>=0.8.1",
     "elasticsearch>=9.0.2",
     "langchain>=0.3.26",
     "langchain-ollama>=0.3.3",

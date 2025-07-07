@@ -5,8 +5,6 @@ from langchain_core.prompts import PromptTemplate
 from langchain_ollama.llms import OllamaLLM
 import re
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../")))
-
 from src.utils.embedding import EmbeddingModel
 from src.utils.elastic import ElasticSearchClient
 

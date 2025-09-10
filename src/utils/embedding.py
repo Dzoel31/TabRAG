@@ -21,7 +21,7 @@ class EmbeddingModel:
         Args:
             model_name (str): The name of the SentenceTransformer model to use.
         """
-        self.model_name = model_name if model_name else "sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
+        self.model_name = model_name if model_name else "nomic-ai/nomic-embed-text-v1.5"
         self.prompt = {
             "classification": "Classify the following text: ",
             "retrieval": "Retrieve semantically similar text: ",
@@ -29,7 +29,9 @@ class EmbeddingModel:
         }
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.default_prompt = default_prompt
-        logger.info(f"Initializing SentenceTransformer with model '{self.model_name}' on device '{self.device}'")
+        logger.info(
+            f"Initializing SentenceTransformer with model '{self.model_name}' on device '{self.device}'"
+        )
         self.model = SentenceTransformer(
             self.model_name,
             device=self.device,
@@ -38,7 +40,12 @@ class EmbeddingModel:
             trust_remote_code=True,
         )
 
-    def embed(self, texts: str | List[str], prefix: Optional[str] = None) -> List[Any]:
+    def embed(
+        self,
+        texts: str | List[str],
+        prefix: Optional[str] = None,
+        type: Optional[str] = None,
+    ) -> List[Any]:
         """
         Generates embeddings for a list of texts.
 
@@ -49,10 +56,14 @@ class EmbeddingModel:
             List[List[float]]: A list of embeddings, where each embedding is a list of floats.
         """
         logger.info(f"Generating embeddings for {len(texts)} texts")
+        prefixes = prefix.split(",") if prefix else []
 
-        if prefix:
-            texts = [f"{prefix}: {text}" for text in texts]
-        
+        if prefixes:
+            if type == "document":
+                texts = [f"{prefixes[0]}: {text}" for text in texts]
+            elif type == "query" and len(prefixes) > 1:
+                texts = [f"{prefixes[1]}: {text}" for text in texts]
+
         return self.model.encode(
             texts, convert_to_tensor=False, show_progress_bar=True
         ).tolist()

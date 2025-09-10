@@ -14,6 +14,7 @@ st.set_page_config(
     page_icon=":question:",
 )
 
+
 def main():
     st.title("TabRAG - Tanya Bareng RAG")
     st.markdown(
@@ -29,16 +30,23 @@ def main():
         """
     )
 
+
 def config():
     st.dialog("Configuration")
-    def menu_config():
-        ...
+
+    def menu_config(): ...
 
 
 # Example navigation using st.navigation and st.Page
-pg = st.navigation([
-    st.Page(main, title="Home", icon="🏠"),
-    st.Page("./src/pages/knowledge_dashboard.py", title="Knowledge Dashboard", icon="📚"),
-    st.Page("./src/pages/chat.py", title="Chat", icon="💬"),
-])
+pg = st.navigation(
+    [
+        st.Page(main, title="Home", icon="🏠"),
+        st.Page(
+            "./src/pages/knowledge_dashboard.py", title="Knowledge Dashboard", icon="📚"
+        ),
+        st.Page("./src/pages/chat.py", title="Chat", icon="💬"),
+        st.Page("./src/pages/settings.py", title="Settings", icon="⚙️"),
+    ],
+    position='top'
+)
 pg.run()

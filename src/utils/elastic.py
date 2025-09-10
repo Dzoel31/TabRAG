@@ -156,9 +156,7 @@ class ElasticSearchClient:
 
         if self.verbose:
             elapsed_time = time.time() - start_time
-            logger.info(
-                f"🔎 Searched {size} documents in {elapsed_time:.2f} seconds"
-            )
+            logger.info(f"🔎 Searched {size} documents in {elapsed_time:.2f} seconds")
             logger.info(response)
 
         return response
@@ -175,9 +173,7 @@ class ElasticSearchClient:
             dict: The Elasticsearch mapping.
         """
         mapping = {"mappings": {"properties": {}}}
-        logger.info(
-            f"Dimension of embeddings: {embedding_size}"
-        )
+        logger.info(f"Dimension of embeddings: {embedding_size}")
 
         for col, dtype in data.dtypes.items():
             if isinstance(dtype, object):
@@ -201,7 +197,7 @@ class ElasticSearchClient:
         }
 
         return mapping
-    
+
     # Need attention for implement embedding
     def parse_json(
         self,

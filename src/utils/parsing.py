@@ -5,6 +5,8 @@ from docling.datamodel.base_models import InputFormat
 from docling.datamodel.pipeline_options import PdfPipelineOptions, EasyOcrOptions
 from docling.document_converter import DocumentConverter, PdfFormatOption
 from docling.datamodel.settings import settings
+from docling_core.transforms.chunker.page_chunker import PageChunker
+from docling_core.transforms.chunker.hybrid_chunker import HybridChunker
 
 import time
 from uuid import uuid4
@@ -13,17 +15,19 @@ import json
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class DocumentParser:
     """
     Parses PDF documents using Docling.
     """
 
-    def __init__(self, pdf_path: Path):
+    def __init__(self, pdf_path: Path, chunk_strategy: str, embedding_model: str):
         self.pdf_path = pdf_path
         self.document_id = str(uuid4())
         self.document_name = pdf_path.stem
-        self._page_placeholder = "<-- Page Break -->"
+        self._chunk_strategy = chunk_strategy
         self._source_path = str(pdf_path)
+        self._embedding_model = embedding_model
         self._total_pages = 0
         self._parse_time = None
 
@@ -69,25 +73,62 @@ class DocumentParser:
             raise ValueError(f"Failed to parse PDF file: {self.pdf_path}")
 
         result = []
-        md = doc.document.export_to_markdown(escape_underscores=False, page_break_placeholder=self._page_placeholder)
-        pages = md.split(self._page_placeholder)
-        # Remove empty/whitespace pages
-        contents = [page.strip() for page in pages if page.strip()]
+        contents = []
+
+        if self._chunk_strategy == "page":
+            page_chunker = PageChunker()
+            chunk_iter = page_chunker.chunk(doc.document)
+            contents = list(chunk_iter)
+
+            for i, chunk in enumerate(contents):
+                metadata = chunk.meta.model_dump()
+                doc_items = metadata["doc_items"]
+                halaman = doc_items[0]["prov"][0]["page_no"]
+                
+                result.append({
+                    "text": chunk.text,
+                    "page_number": halaman,
+                })
+
+
+        elif self._chunk_strategy == "hybrid":
+            from docling_core.transforms.chunker.tokenizer.huggingface import (
+                HuggingFaceTokenizer,
+            )
+            from transformers import AutoTokenizer
+
+            tokenizer = HuggingFaceTokenizer(
+                tokenizer=AutoTokenizer.from_pretrained(self._embedding_model),
+                max_tokens=512,
+            )
+            chunker = HybridChunker(
+                tokenizer=tokenizer,
+            )
+            chunk_iter = chunker.chunk(dl_doc=doc.document)
+            contents = list(chunk_iter)
+
+            for i, chunk in enumerate(contents):
+                metadata = chunk.meta.model_dump()
+                doc_items = metadata["doc_items"]
+                halaman = doc_items[0]["prov"][0]["page_no"]
+                contextual_text = chunker.contextualize(chunk=chunk)
+                length_token = chunker.tokenizer.count_tokens(contextual_text)
+
+                result.append({
+                    "text": contextual_text,
+                    "page_number": halaman,
+                    "chunk_number": i,
+                    "token_length": length_token
+                })
 
         # Perform a check for empty content and force full page OCR
         if not contents:
             raise ValueError(f"No content found in PDF file: {self.pdf_path}")
-        
-        self._total_pages = len(contents)
-        
-        for i, content in enumerate(contents):
-            result.append({
-                "text": content,
-                "page_number": i + 1,
-            })
+
+        self._total_pages = doc.input.page_count
 
         return result
-    
+
     def is_content_empty(self, parsed_doc: list[dict]) -> bool:
         """
         Check if the parsed document content is empty.
@@ -101,12 +142,16 @@ class DocumentParser:
         """
         if not parsed_doc:
             raise ValueError("Parsed document is None or empty.")
-        
+
         # Check all pages and store if any page is empty
         if not isinstance(parsed_doc, list):
             raise ValueError("Parsed document should be a list of pages.")
 
-        page_no = [i + 1 for i, page in enumerate(parsed_doc) if not page.get("text", "").strip()]
+        page_no = [
+            i + 1
+            for i, page in enumerate(parsed_doc)
+            if not page.get("text", "").strip()
+        ]
 
         if page_no:
             logger.warning(f"Empty pages found: {page_no}")
@@ -133,7 +178,7 @@ class DocumentParser:
         }
 
         return parsed_content
-    
+
     def to_json(self, parsed_doc: list[dict]) -> None:
         """
         Convert the parsed document to a JSON file format.
@@ -147,7 +192,7 @@ class DocumentParser:
         """
         if not parsed_doc:
             raise ValueError("Parsed document is None or empty.")
-        
+
         # Create temporary directory if it doesn't exist
         json_dir = Path("./src/data/json")
         json_dir.mkdir(parents=True, exist_ok=True)
@@ -172,24 +217,31 @@ class DocumentParser:
 
     def __str__(self):
         return f"DocumentParser(pdf_path={self.pdf_path}, document_name={self.document_name})"
-    
+
     def __repr__(self):
         return f"DocumentParser(pdf_path={self.pdf_path}, document_name={self.document_name})"
-    
 
 
 def main():
     pdf_path = Path("./src/data/1908.10084v1.pdf")
     start = time.time()
     logger.info(f"Starting to parse PDF document: {pdf_path.stem}")
-    result = DocumentParser(pdf_path)
+    result = DocumentParser(
+        pdf_path,
+        chunk_strategy="hybrid",
+        embedding_model="nomic-ai/nomic-embed-text-v1.5",
+    )
     parsed_document = result.parse_pdf()
     end = time.time()
     print("Metadata: \n", json.dumps(result.metadata, indent=2))
     logger.info(f"Parsed PDF document with {len(parsed_document)} pages.")
     print("Parsed Document: \n", json.dumps(parsed_document, indent=2))
-    print("Parsed Document Full: \n", json.dumps(result.to_dict(parsed_document), indent=2))
+    print(
+        "Parsed Document Full: \n",
+        json.dumps(result.to_dict(parsed_document), indent=2),
+    )
     logger.info(f"PDF parsing took {end - start:.2f} seconds.")
+
 
 if __name__ == "__main__":
     main()

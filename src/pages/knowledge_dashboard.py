@@ -1,7 +1,5 @@
-from venv import logger
 import streamlit as st
 import pandas as pd
-import sys
 import os
 from pathlib import Path
 import json
@@ -11,6 +9,10 @@ import logging
 from src.utils.parsing import DocumentParser
 from src.utils.embedding import EmbeddingModel
 from src.utils.elastic import ElasticSearchClient
+from src.utils.milvus import MilvusClient
+from src.utils.qdrant import QdrantClientWrapper
+
+from langchain.schema import Document
 
 temp_dir_pdf = Path("src/data/pdf")
 temp_dir_json = Path("src/data/json")
@@ -58,8 +60,19 @@ if uploaded_documents:
 
 documents = os.listdir(temp_dir_pdf) if temp_dir_pdf.exists() else []
 
+
+process_single_file = st.selectbox(
+    "Select a document to process",
+    options=["Select a document"] + documents,
+    key="process_single_file",
+    help="Choose a document. Dont change this if you want to process all documents.",
+)
+
+if process_single_file and process_single_file != "Select a document":
+    documents = [process_single_file]  # Reset documents to the selected one
+
 process_button = st.button(
-    "Process Documents",
+    "Process All Documents",
     key="process_button",
     help="Click to parse and index the uploaded documents.",
     disabled=not documents,  # Disable if no documents are uploaded
@@ -76,7 +89,11 @@ if process_button:
             for counter in range(len(documents)):
                 doc_name = documents[counter]
                 doc_path = temp_dir_pdf / doc_name
-                parser = DocumentParser(doc_path)
+                parser = DocumentParser(
+                    pdf_path=doc_path,
+                    chunk_strategy=st.session_state.chunk_strategy,
+                    embedding_model=st.session_state.embedding_model,
+                )
 
                 try:
                     progress_docs.progress(
@@ -110,9 +127,6 @@ def process_json_to_dataframe(json_file):
     df_content = pd.DataFrame(pages)
     # Repeat metadata for each page
     df_temp = pd.concat([df_temp] * len(df_content), ignore_index=True)
-    df_content = df_content.rename(
-        columns={"text": "Content", "page_number": "Page Number"}
-    )
 
     return pd.concat([df_temp, df_content], axis=1)
 
@@ -140,21 +154,24 @@ if result_documents:
     if embedding:
         doc_path = temp_dir_json / result
         df = process_json_to_dataframe(doc_path)
-        # embedding_model = EmbeddingModel(model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
-        embedding_model = EmbeddingModel(model_name="nomic-ai/nomic-embed-text-v1.5")
+        embedding_model = EmbeddingModel(model_name=st.session_state.embedding_model)
         st.session_state["embedding_size"] = embedding_model.embedding_size
         with st.status("Generating embeddings..."):
             with st.spinner(f"Generating embeddings for {result}..."):
                 try:
-                    logger.info(f"Dimension of embeddings: {st.session_state['embedding_size']}")
+                    logger.info(
+                        f"Dimension of embeddings: {st.session_state['embedding_size']}"
+                    )
                     if "embedding" in df.columns and df["embedding"].notnull().any():
                         st.warning(
                             "Embeddings already exist for this document. Skipping generation."
                         )
                         st.toast(f"Embeddings already exist for {result}.")
                     else:
-                        texts = df["Content"].tolist()
-                        embeddings = embedding_model.embed(texts)
+                        texts = df["text"].tolist()
+                        embeddings = embedding_model.embed(
+                            texts=texts, prefix=st.session_state.prefix, type="document"
+                        )
                         df["embedding"] = embeddings
 
                         # Save embeddings back to JSON
@@ -165,22 +182,60 @@ if result_documents:
                         with open(doc_path, "w") as f:
                             json.dump(data, f, indent=2)
 
-                    elastic_client = ElasticSearchClient(
-                        index="rag-faq", verbose=True
-                    )
+                    match st.session_state.vector_backend:
+                        case "elasticsearch":
+                            elastic_client = ElasticSearchClient(
+                                index=st.session_state.collection_name, verbose=True
+                            )
 
-                    mapping = elastic_client.elastic_mapping(
-                        df, st.session_state["embedding_size"]
-                    )  # type: ignore
+                            mapping = elastic_client.elastic_mapping(
+                                df, st.session_state["embedding_size"]
+                            )  # type: ignore
 
-                    elastic_client.create_index(
-                        mapping=mapping,
-                    )
+                            elastic_client.create_index(
+                                mapping=mapping,
+                            )
 
-                    elastic_client.bulk_index(
-                        data=df,
-                        refresh=True,
-                    )
+                            elastic_client.bulk_index(
+                                data=df,
+                                refresh=True,
+                            )
+                        case "milvus":
+                            df = df.drop(columns=["embedding"])
+                            list_document  = []
+
+                            for _, row in df.iterrows():
+                                document = Document(
+                                    page_content=row["text"],
+                                    metadata={
+                                        "document_id": row["document_id"],
+                                        "document_name": row["document_name"],
+                                        "total_pages": row["total_pages"],
+                                        "page_number": row["page_number"],
+                                    },
+                                )
+                                list_document.append(document)
+
+                            milvus_client = MilvusClient(
+                                collection_name=st.session_state.collection_name,
+                                documents=list_document,
+                                embedding=st.session_state.embedding_model,
+                                connection_mode=st.session_state.connection_type,
+                            )
+                        case "qdrant":
+                            qdrant_client = QdrantClientWrapper(
+                                path=st.session_state.local_path_db
+                            )
+
+                            qdrant_client.create_collection(
+                                collection_name=st.session_state.collection_name,
+                                vector_size=st.session_state.embedding_size,
+                            )
+
+                            qdrant_client.add_document(
+                                collection_name=st.session_state.collection_name,
+                                document=df
+                            )
 
                 except Exception as e:
                     logging.error(f"Error generating embeddings for {result}: {e}")

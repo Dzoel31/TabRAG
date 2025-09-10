@@ -22,24 +22,24 @@ Sebelum melanjutkan proses instalasi, pastikan Anda telah menginstal beberapa ap
 
 1. Clone repositori ini:
 
-        ```bash
-        git clone https://github.com/dzoel31/TabRAG.git
-        cd TabRAG
-        ```
+    ```bash
+    git clone https://github.com/dzoel31/TabRAG.git
+    cd TabRAG
+    ```
 
 2. Instal dependensi (memerlukan uv, bisa unduh dari [link ini](https://docs.astral.sh/uv/getting-started/installation/)):
 
-        ```bash
-        uv sync
-        ```
+    ```bash
+    uv sync
+    ```
 
 ## Penggunaan ▶️
 
 1. Jalankan aplikasi Streamlit:
 
-        ```bash
-        streamlit run main.py
-        ```
+    ```bash
+    streamlit run main.py
+    ```
 
 2. Buka browser dan akses `http://localhost:8501` untuk mulai menggunakan aplikasi.
 
@@ -83,8 +83,18 @@ Examples:
 
 Jika Anda menemukan bug atau memiliki saran untuk peningkatan, silakan buka [issue](https://github.com/dzoel31/TabRAG/issues).
 
+## Acknowledgements
+
+This project was developed as a personal initiative to implement the knowledge and skills I gained during my internship at Badan Pendidikan dan Pelatihan Keuangan, Kementerian Keuangan Republik Indonesia.
+
+Special thanks to the Data Science team for their open collaboration, valuable insights, and guidance during our research sessions, your contributions deeply shaped this project.  
+I am also sincerely grateful to my mentor, whose patience, support, and encouragement helped me grow both technically and professionally.
+
+This project stands as a reflection of the collective learning, experiments, and challenges we faced during that journey.
+
 ---
 
 **Status Proyek:** Ready for Use 🚦  
 **Terakhir Diperbarui:** 7 Juli 2025 📅  
 **Versi:** 0.1.0 🏷️
+

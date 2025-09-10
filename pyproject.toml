@@ -9,8 +9,12 @@ dependencies = [
     "einops>=0.8.1",
     "elasticsearch>=9.0.2",
     "langchain>=0.3.26",
+    "langchain-milvus>=0.2.1",
     "langchain-ollama>=0.3.3",
+    "pymilvus>=2.6.0",
     "python-dotenv>=1.1.1",
+    "qdrant-client>=1.15.1",
+    "ruff>=0.12.5",
     "sentence-transformers>=4.1.0",
     "streamlit>=1.46.1",
 ]
@@ -20,7 +24,43 @@ index-strategy = "unsafe-best-match"
 
 [dependency-groups]
 dev = [
+    "black>=25.1.0",
     "coverage>=7.9.1",
     "pytest>=8.4.1",
+    "python-semantic-release>=10.3.1",
     "ruff>=0.12.1",
+]
+
+[tool.black]
+line-length = 88
+target-version = ["py310", "py311", "py312", "py313"]
+
+[tool.ruff]
+line-length = 88
+lint.select = ["E", "F"]
+
+[tool.semantic_release]
+version_toml = ["pyproject.toml:project.version"]
+commit_parser = "conventional"
+branch = "main"
+version_source = "tag"
+upload_to_pypi = false
+changelog_file = "CHANGELOG.md"
+
+[tool.semantic_release.commit_parser_options]
+allowed_types = "build,chore,ci,docs,feat,fix,perf,style,refactor,test"
+minor_types = "feat"
+patch_types = "fix,perf"
+
+[tool.semantic_release.changelog]
+# Recommended patterns for conventional commits parser that is scope aware
+# Refer to: https://python-semantic-release.readthedocs.io/en/latest/index.html
+exclude_commit_patterns = [
+    '''chore(?:\([^)]*?\))?: .+''',
+    '''ci(?:\([^)]*?\))?: .+''',
+    '''refactor(?:\([^)]*?\))?: .+''',
+    '''style(?:\([^)]*?\))?: .+''',
+    '''test(?:\([^)]*?\))?: .+''',
+    '''build\((?!deps\): .+)''',
+    '''Initial [Cc]ommit.*''',
 ]

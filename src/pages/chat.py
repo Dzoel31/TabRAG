@@ -40,7 +40,7 @@ if user_input:
     {question}
 
     /no_think
-    """
+    """  # noqa: E501
     prompt = PromptTemplate.from_template(template)
     contexts = None
 
@@ -70,7 +70,7 @@ if user_input:
             )
 
             retrieved_ctx = search_client.retriever(st.session_state.top_docs)
-            
+
         case "qdrant":
             query_client = QdrantClientWrapper(path=st.session_state.local_path_db)
             retrieved_ctx = query_client.search(
@@ -95,13 +95,11 @@ if user_input:
             response_placeholder = st.empty()
             full_response = ""
             for chunk in llm.stream(prompt):
-                # Remove <think>...</think> tags and any leading/trailing whitespace from the chunk if present
-                chunk = re.sub(r"<think>.*?</think>", "", chunk, flags=re.DOTALL)
-                # Skip empty chunks after cleaning
-                if not chunk:
-                    continue
-                full_response += chunk
-                response_placeholder.markdown(full_response)
+                # Remove <think>...</think> tags
+                # any leading/trailing whitespace from the chunk if present
+                full_response += chunk 
+            match = re.sub(r"<think>.*?</think>", "", full_response, flags=re.DOTALL)
+            response_placeholder.markdown(full_response)
             st.session_state["message_history"].append(
                 {"role": "assistant", "content": full_response}
             )

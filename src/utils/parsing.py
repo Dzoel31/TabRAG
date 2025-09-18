@@ -84,12 +84,13 @@ class DocumentParser:
                 metadata = chunk.meta.model_dump()
                 doc_items = metadata["doc_items"]
                 halaman = doc_items[0]["prov"][0]["page_no"]
-                
-                result.append({
-                    "text": chunk.text,
-                    "page_number": halaman,
-                })
 
+                result.append(
+                    {
+                        "text": chunk.text,
+                        "page_number": halaman,
+                    }
+                )
 
         elif self._chunk_strategy == "hybrid":
             from docling_core.transforms.chunker.tokenizer.huggingface import (
@@ -114,12 +115,14 @@ class DocumentParser:
                 contextual_text = chunker.contextualize(chunk=chunk)
                 length_token = chunker.tokenizer.count_tokens(contextual_text)
 
-                result.append({
-                    "text": contextual_text,
-                    "page_number": halaman,
-                    "chunk_number": i,
-                    "token_length": length_token
-                })
+                result.append(
+                    {
+                        "text": contextual_text,
+                        "page_number": halaman,
+                        "chunk_number": i,
+                        "token_length": length_token,
+                    }
+                )
 
         # Perform a check for empty content and force full page OCR
         if not contents:
@@ -216,10 +219,12 @@ class DocumentParser:
         }
 
     def __str__(self):
-        return f"DocumentParser(pdf_path={self.pdf_path}, document_name={self.document_name})"
+        return (f"DocumentParser(pdf_path={self.pdf_path}, "
+                f"document_name={self.document_name})")
 
     def __repr__(self):
-        return f"DocumentParser(pdf_path={self.pdf_path}, document_name={self.document_name})"
+        return (f"DocumentParser(pdf_path={self.pdf_path}, "
+                f"document_name={self.document_name})")
 
 
 def main():

@@ -7,6 +7,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class MilvusClient:
     """Milvus backend vector store
 
@@ -52,7 +53,6 @@ class MilvusClient:
         else:
             connection_args = {"host": self.host, "port": self.port}
 
-        
         try:
             self.client = Milvus.from_documents(
                 documents=self.documents,

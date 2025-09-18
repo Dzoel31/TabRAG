@@ -19,8 +19,10 @@ def main():
     st.title("TabRAG - Tanya Bareng RAG")
     st.markdown(
         """
-        This is a simple TabRAG - Tanya Bareng RAG application built with Streamlit, LangChain, and Ollama.
-        You can upload PDF documents, chat with the knowledge base, and view the knowledge dashboard.
+        This is a simple TabRAG - Tanya Bareng RAG application built with Streamlit, 
+        LangChain, and Ollama.
+        You can upload PDF documents, chat with the knowledge base, and view the 
+        knowledge dashboard.
         - **Knowledge Dashboard**: View and manage your knowledge base.
         - **Chat**: Ask questions about the knowledge base and get answers.
 
@@ -47,6 +49,6 @@ pg = st.navigation(
         st.Page("./src/pages/chat.py", title="Chat", icon="💬"),
         st.Page("./src/pages/settings.py", title="Settings", icon="⚙️"),
     ],
-    position='top'
+    position="top",
 )
 pg.run()

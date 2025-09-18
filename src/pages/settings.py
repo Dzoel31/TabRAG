@@ -1,5 +1,4 @@
 import streamlit as st
-from uuid import uuid4
 
 # --- Page Config ---
 st.set_page_config(
@@ -230,7 +229,8 @@ with vs_cols[0]:
                 st.session_state.local_path_db = st.text_input(
                     "Qdrant URI (file path)",
                     value=str(
-                        st.session_state.local_path_db or "src/data/qdrant/vector_store.db"
+                        st.session_state.local_path_db
+                        or "src/data/qdrant/vector_store.db"
                     ),
                     help=("Path to a local Qdrant/SQLite-style store."),
                     placeholder="e.g. src/data/qdrant/vector_store.db",

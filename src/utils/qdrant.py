@@ -1,6 +1,6 @@
 import logging
 import time
-from typing import Optional, Dict, Sequence
+from typing import Optional, Dict
 from contextlib import suppress
 import threading
 from qdrant_client import QdrantClient
@@ -75,9 +75,9 @@ class QdrantClientWrapper:
                     payload["chunk_number"] = row["chunk_number"]
                 docs.append(
                     PointStruct(
-                    id=str(uuid4()),
-                    vector=row["embedding"],
-                    payload=payload,
+                        id=str(uuid4()),
+                        vector=row["embedding"],
+                        payload=payload,
                     )
                 )
                 time.sleep(0.5)

@@ -1,6 +1,6 @@
 [project]
 name = "TabRAG"
-version = "1.0.0"
+version = "1.1.0"
 description = "TabRAG (Tanya Bareng RAG) is a Streamlit app that allows users to upload documents and query them using a RAG (Retrieval-Augmented Generation) approach with an Elasticsearch backend."
 readme = "README.md"
 requires-python = ">=3.12"

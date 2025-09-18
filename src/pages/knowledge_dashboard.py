@@ -44,8 +44,10 @@ uploaded_documents = st.file_uploader(
     key=st.session_state["pdf_uploader_key"],
     accept_multiple_files=True,
     on_change=toast_upload_success,
-    help=("You can upload multiple PDF files at once. "
-          "The documents will be parsed and indexed."),
+    help=(
+        "You can upload multiple PDF files at once. "
+        "The documents will be parsed and indexed."
+    ),
 )
 
 # Save uploaded documents to a temporary directory
@@ -164,10 +166,12 @@ if result_documents:
                         f"Dimension of embeddings: {st.session_state['embedding_size']}"
                     )
                     if "embedding" in df.columns and df["embedding"].notnull().any():
-                        st.warning((
-                            "Embeddings already exist for this document. "
-                            "Skipping generation."
-                        ))
+                        st.warning(
+                            (
+                                "Embeddings already exist for this document. "
+                                "Skipping generation."
+                            )
+                        )
                         st.toast(f"Embeddings already exist for {result}.")
                     else:
                         texts = df["text"].tolist()
@@ -242,8 +246,10 @@ if result_documents:
                 except Exception as e:
                     logging.error(f"Error generating embeddings for {result}: {e}")
                     st.error(
-                        (f"Failed to generate embeddings for {result}. "
-                        "Check logs for details.")
+                        (
+                            f"Failed to generate embeddings for {result}. "
+                            "Check logs for details."
+                        )
                     )
 
         st.success(f"Embeddings generated and saved for {result}.")

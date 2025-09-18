@@ -219,12 +219,16 @@ class DocumentParser:
         }
 
     def __str__(self):
-        return (f"DocumentParser(pdf_path={self.pdf_path}, "
-                f"document_name={self.document_name})")
+        return (
+            f"DocumentParser(pdf_path={self.pdf_path}, "
+            f"document_name={self.document_name})"
+        )
 
     def __repr__(self):
-        return (f"DocumentParser(pdf_path={self.pdf_path}, "
-                f"document_name={self.document_name})")
+        return (
+            f"DocumentParser(pdf_path={self.pdf_path}, "
+            f"document_name={self.document_name})"
+        )
 
 
 def main():

@@ -68,7 +68,7 @@ class ElasticSearchClient:
         Create an index in Elasticsearch with the specified mapping.
 
         Args:
-            index (str): The name of the index to create. 
+            index (str): The name of the index to create.
                 Defaults to the instance's index.
             mapping (dict): The mapping for the index. If None, uses default mapping.
         """
@@ -208,15 +208,15 @@ class ElasticSearchClient:
         doc_id: Optional[str] = None,
     ):
         """
-        Parse JSON data (with 'content' as a list of pages) and index each page 
+        Parse JSON data (with 'content' as a list of pages) and index each page
         in Elasticsearch.
 
         Args:
-            json_data (dict): The JSON data to index (with 'content' as a list 
+            json_data (dict): The JSON data to index (with 'content' as a list
             of pages).
             embedding_size (int): The size of the embedding vector (mandatory).
             index (str): The name of the index. Defaults to the instance's index.
-            doc_id (str): The document ID. If not provided, a new ID will be 
+            doc_id (str): The document ID. If not provided, a new ID will be
             generated for each page.
 
         Returns:
@@ -250,11 +250,13 @@ class ElasticSearchClient:
             page_id = doc_id or str(uuid4())
             response = self.client.index(index=index, id=page_id, document=page_doc)
             if self.verbose:
-                logger.info((
-                    f"📥 Indexed page {page.get('page_number')} of document "
-                    f"{json_data.get('document_name')} as {page_id} in {index}: "
-                    f"{response}"
-                ))
+                logger.info(
+                    (
+                        f"📥 Indexed page {page.get('page_number')} of document "
+                        f"{json_data.get('document_name')} as {page_id} in {index}: "
+                        f"{response}"
+                    )
+                )
             responses.append(response)
         return responses
 
@@ -267,7 +269,7 @@ class ElasticSearchClient:
         Args:
             actions (list): A list of actions to perform (e.g., index, update).
             index (str): The name of the index. Defaults to the instance's index.
-            refresh (bool): Whether to refresh the index after bulk indexing. 
+            refresh (bool): Whether to refresh the index after bulk indexing.
                 Defaults to True.
 
         Returns:
@@ -307,10 +309,12 @@ class ElasticSearchClient:
 
         if self.verbose:
             elapsed_time = time.time() - start_time
-            logger.info((
-                f"📦 Bulk indexed {len(data)} documents in {elapsed_time:.2f} " 
-                f"seconds: {response}"
-            ))
+            logger.info(
+                (
+                    f"📦 Bulk indexed {len(data)} documents in {elapsed_time:.2f} "
+                    f"seconds: {response}"
+                )
+            )
 
         if "errors" in response and response["errors"]:
             logger.error(f"Bulk indexing encountered errors: {response['errors']}")
@@ -321,7 +325,7 @@ class ElasticSearchClient:
         Delete an index in Elasticsearch.
 
         Args:
-            index (str): The name of the index to delete. 
+            index (str): The name of the index to delete.
                 Defaults to the instance's index.
         """
         if not index:
@@ -376,7 +380,7 @@ if __name__ == "__main__":
     main()
     # Example usage
     # client.create_index(
-    # index="test_index", 
+    # index="test_index",
     # mapping={"properties": {"text": {"type": "text"}}})
     # client.index_document({"text": "Hello, world!"}, index="test_index")
     # response = client.search(query_embedding=[0.1, 0.2, 0.3], index="test_index")

@@ -97,7 +97,7 @@ if user_input:
             for chunk in llm.stream(prompt):
                 # Remove <think>...</think> tags
                 # any leading/trailing whitespace from the chunk if present
-                full_response += chunk 
+                full_response += chunk
             match = re.sub(r"<think>.*?</think>", "", full_response, flags=re.DOTALL)
             response_placeholder.markdown(full_response)
             st.session_state["message_history"].append(

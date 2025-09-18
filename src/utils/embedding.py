@@ -30,8 +30,10 @@ class EmbeddingModel:
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.default_prompt = default_prompt
         logger.info(
-            (f"Initializing SentenceTransformer with model '{self.model_name}' "
-             f"on device '{self.device}'")
+            (
+                f"Initializing SentenceTransformer with model '{self.model_name}' "
+                f"on device '{self.device}'"
+            )
         )
         self.model = SentenceTransformer(
             self.model_name,
@@ -54,7 +56,7 @@ class EmbeddingModel:
             texts (List[str]): A list of strings to embed.
             prefix (str, optional): A prefix to prepend to each text before embedding.
         Returns:
-            List[List[float]]: A list of embeddings, where each embedding is a list of 
+            List[List[float]]: A list of embeddings, where each embedding is a list of
                 floats.
         """
         logger.info(f"Generating embeddings for {len(texts)} texts")
